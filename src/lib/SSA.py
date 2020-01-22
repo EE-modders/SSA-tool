@@ -89,9 +89,9 @@ class SSA:
 
             # since FUCKING WINDOWS shit has "\" instead "/" like every other normal OS I need to check for it
             if sys.platform[:3] == "lin":
-                print("found Linux: replacing \\ with /")
+                #print("found Linux: replacing \\ with /")
                 path = path.replace("\\", "/")
-            print(path)
+            #print(path)
             with open(path, 'wb') as newfile:
                 ssa.seek(asset[1] - self.header_length) # we need to subtract header length because the SSAbody doesn't contain the header anymore (after read_from_file())
                 newfile.write(ssa.read(asset[3]))
