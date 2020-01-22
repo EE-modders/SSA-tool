@@ -81,7 +81,13 @@ if filename.split('.')[-1] != "ssa":
 
 # start extraction process
 SSA = SSA()
-SSA.read_from_file(sys.argv[1])
+
+try:
+    SSA.read_from_file(sys.argv[1])
+except TypeError as err:
+    print(err.args[0] + "version of the file: " + err.args[1] + err.args[2])
+except ImportError as err:
+    print(err.args[0] + "imported magic number: " + err.args[1])
 
 SSA.extract(SSA.get_files_list(), SSA.SSAbody)
 
