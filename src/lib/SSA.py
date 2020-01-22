@@ -75,6 +75,7 @@ class SSA:
         return files
 
     def extract(self, files_list: list, ssa_binary: bytes):
+        print("extracting........")
         ssa = BytesIO(ssa_binary)
         export_folder = "extracted"
 

@@ -33,7 +33,7 @@ print("###----------------------------------------------\n")
 def show_help():
     print("USAGE: SSAtool [options] <SSAfile>")
     # TODO: "--info" (show header information only)
-    print()
+    print("or you can just drag & drop the SSA file onto this executable")
     print()
     print("possible options:")
     print("-h, --help, -v\tshow this help / version information")
