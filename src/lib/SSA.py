@@ -68,7 +68,7 @@ class SSA:
         output = "SSA files list: \n"
 
         for file in files:
-            output += "name: %s; start offset: %d; end offset: %d; size: %dKiB" % (file[0], file[1], file[2], file[3]/1024)
+            output += "%s; start offset: %d; end offset: %d; size: %dKiB" % (file[0], file[1], file[2], file[3]/1024)
             output += "\n"
 
         print(output)

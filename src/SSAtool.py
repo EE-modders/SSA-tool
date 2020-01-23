@@ -15,12 +15,13 @@ from lib.SSA import SSA
 importlib.reload(lib)
 
 
-version = "0.1 alpha"
+version = "0.2 alpha"
 
 magic_number_compressed = b'PK01'
 magic_number_SSA = b'rass'
 confirm = True
 short_output = False
+info_only = False
 
 print("### SSA Extractor for Empire Earth made by zocker_160")
 print("### version %s" % version)
@@ -32,11 +33,11 @@ print("###----------------------------------------------\n")
 
 def show_help():
     print("USAGE: SSAtool [options] <SSAfile>")
-    # TODO: "--info" (show header information only)
     print("or you can just drag & drop the SSA file onto this executable")
     print()
     print("possible options:")
     print("-h, --help, -v\tshow this help / version information")
+    print("--info\tonly show the list of files inside this archive")
     #print("-nc\t\t\"no confirm\" disables all confirmation questions\n\t\tuseful for batch conversion")
     #print("-so\t\t\"short output\" doesn't add \"_NEW_\" to the output SST file")
     if confirm: input("press Enter to close........")
@@ -61,7 +62,10 @@ for i, arg in enumerate(sys.argv):
         parameter_list.append(i)        
     if arg == "-so":
         short_output = True
-        parameter_list.append(i)        
+        parameter_list.append(i)   
+    if arg == "--info":
+        info_only = True
+        parameter_list.append(i)
 
 # remove commandline parameters
 parameter_list.sort(reverse=True)
@@ -88,6 +92,10 @@ except TypeError as err:
     print(err.args[0] + "version of the file: " + err.args[1] + err.args[2])
 except ImportError as err:
     print(err.args[0] + "imported magic number: " + err.args[1])
+
+if info_only:
+    SSA.print_files_list()
+    show_exit()
 
 SSA.extract(SSA.get_files_list(), SSA.SSAbody)
 
