@@ -94,7 +94,6 @@ class DCL:
             response = subprocess.run(command, stdout=subprocess.PIPE)
             #print(response)
         else:
-            subprocess.run("chmod +x " + sys._MEIPASS + "/blast_args")
             command = sys._MEIPASS + "/blast_args " + "\"" + tmpfile + "\" \"" + outputfile + "\""
 
             response = subprocess.run(command, stdout=subprocess.PIPE)
