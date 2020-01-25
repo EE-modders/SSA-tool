@@ -8,7 +8,10 @@ Created on 22.01.2020 20:08 CET
 
 import os
 import sys
+import tempfile
 from io import BytesIO
+
+from lib.DCL import DCL
 
 class SSA:
     def __init__(self, version_major=0, version_minor=0, data_offset=0, data_body=b''):
@@ -74,12 +77,27 @@ class SSA:
         print(output)
         return files
 
-    def extract(self, files_list: list, ssa_binary: bytes):
-        print("extracting........")
+    def extract(self, files_list: list, ssa_binary: bytes, decompress=False):        
+        # check for OS
+        os_delimiter = ""
+        if sys.platform[:3] == "win":            
+            windows = True
+            os_delimiter = "\\"
+        else:
+            windows = False
+            os_delimiter = "/"
+        
+        if decompress:
+            export_folder = "extracted_decompressed"
+            print("extracting & decompressing........")
+        else:
+            export_folder = "extracted"
+            print("extracting........")
         ssa = BytesIO(ssa_binary)
-        export_folder = "extracted"
 
-        if not os.path.exists(export_folder): os.makedirs(export_folder)
+
+        if not os.path.exists(export_folder):
+            os.makedirs(export_folder)
         os.chdir(export_folder)
 
         for asset in files_list:
@@ -89,10 +107,32 @@ class SSA:
                 os.makedirs(folder)
 
             # since FUCKING WINDOWS shit has "\" instead "/" like every other normal OS I need to check for it
-            if sys.platform[:3] == "lin":
+            if not windows:
                 #print("found Linux: replacing \\ with /")
                 path = path.replace("\\", "/")
             #print(path)
-            with open(path, 'wb') as newfile:
+
+            ## decompressor
+            if decompress:
+                if windows:
+                    path = os.getcwd() + os_delimiter + path
+                else:
+                    path = os.getcwd() + os_delimiter + path
+
+                data_blob = b''
                 ssa.seek(asset[1] - self.header_length) # we need to subtract header length because the SSAbody doesn't contain the header anymore (after read_from_file())
-                newfile.write(ssa.read(asset[3]))
+                data_blob = ssa.read(asset[3])
+
+                try:
+                    DCL_tmp = DCL(empty=False, data=data_blob)
+                    DCL_tmp.decompress_sub(path)
+                    del DCL_tmp
+                except TypeError as err:
+                    # print("This file is not compressed; magic: %s\n%s" % (err.args[0], path.split(os_delimiter)[-1]))
+                    with open(path, 'wb') as newfile:
+                        newfile.write(data_blob)
+
+            else:
+                with open(path, 'wb') as newfile:
+                    ssa.seek(asset[1] - self.header_length) # we need to subtract header length because the SSAbody doesn't contain the header anymore (after read_from_file())
+                    newfile.write(ssa.read(asset[3]))
