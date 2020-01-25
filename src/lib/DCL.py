@@ -83,17 +83,17 @@ class DCL:
         tmpfile = tempfile.gettempdir() + os_delimiter + tmpname
 
         # print(os.getcwd())
+
+        # write temp file
+        with open(tmpfile, "wb") as tf:
+            tf.write(self.data)
                 
         if is_windows:
-            with open(tmpfile, "wb") as tf:
-                tf.write(self.magic + self.size + self.unknown + self.data)
             command = sys._MEIPASS + "\\blast_args.exe " + "\"" + tmpfile + "\" \"" + outputfile + "\""
             #print(command)
             response = subprocess.run(command, stdout=subprocess.PIPE)
             #print(response)
         else:
-            with open(tmpfile, "wb") as tf:
-                tf.write(self.data)
             command = sys._MEIPASS + "/blast_args " + "\"" + tmpfile + "\" \"" + outputfile + "\""
 
             response = subprocess.run(command, stdout=subprocess.PIPE)
