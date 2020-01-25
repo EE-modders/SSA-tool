@@ -27,7 +27,7 @@ jobs:
       run: python .\src\SSAtool.py -v
     
     - name: compile SSAtool
-      run: pyinstaller -F .\src\SSAtool.py
+      run: pyinstaller -F --add-data ".\src\lib\blast_args.exe;." .\src\SSAtool.py
       
     - name: run compiled version
       run: .\dist\SSAtool.exe -v
