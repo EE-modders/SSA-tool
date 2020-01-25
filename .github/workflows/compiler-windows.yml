@@ -37,8 +37,14 @@ jobs:
     - name: run compiled version
       run: .\dist\SSAtool.exe -v
 
-    - name: save compiled files
+    - name: save compiled executable
       uses: actions/upload-artifact@master
       with:
         name: SSAtool_windows
         path: .\dist\
+
+    - name: save compiled library
+      uses: actions/upload-artifact@master
+      with:
+        name: SSAtool_windows
+        path: .\src\lib\blast_args.exe
