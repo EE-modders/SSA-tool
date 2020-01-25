@@ -26,7 +26,7 @@ jobs:
 
     - name: Setup C++ environment
       uses: kurocha/setup-cpp@v1
-    
+      
     - name: compile C library "blast"
       run: gcc -o ./src/lib/blast_args ./src/lib/blast_args.c
     
