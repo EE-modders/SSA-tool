@@ -455,8 +455,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    FILE *inputfile = fopen(argv[1], "r");
-    FILE *outputfile = fopen(argv[2], "w");
+    FILE *inputfile = fopen(argv[1], "rb");
+    FILE *outputfile = fopen(argv[2], "wb");
     // freopen(argv[2], "w", stdout);
 
     /* decompress to stdout */
