@@ -125,7 +125,7 @@ class SSA:
 
                 try:
                     DCL_tmp = DCL(header=True, data=data_blob)
-                    DCL_tmp.decompress_sub(path)
+                    DCL_tmp.decompress_sub2(path)
                     del DCL_tmp
                 except TypeError as err:
                     # print("This file is not compressed; magic: %s\n%s" % (err.args[0], path.split(os_delimiter)[-1]))
