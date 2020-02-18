@@ -124,7 +124,7 @@ class SSA:
                 data_blob = ssa.read(asset[3])
 
                 try:
-                    DCL_tmp = DCL(empty=False, data=data_blob)
+                    DCL_tmp = DCL(header=True, data=data_blob)
                     DCL_tmp.decompress_sub(path)
                     del DCL_tmp
                 except TypeError as err:
