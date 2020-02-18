@@ -126,14 +126,14 @@ class DCL:
             os_delimiter = "/"
 
         tmpfile = tempfile.gettempdir() + os_delimiter + tmpname
-        
+
         print("decompress.....")
         # write temp file
         with open(tmpfile, "wb") as tf:
             tf.write(self.data)
 
         if is_windows:
-            command = sys._MEIPASS + "\\exploder.exe " + "\"" + tmpfile + "\""
+            command = sys._MEIPASS + "\\exploder.exe " + tmpfile
             print(command)            
         else:            
             #command = sys._MEIPASS + "/exploder " + "\"" + tmpfile + "\""        
