@@ -22,15 +22,15 @@ jobs:
     - name: pyinstaller version
       run: pyinstaller --version
       
-      
+
     - name: Set up Golang
       uses: actions/setup-go@v1
 
     - name: compile GO library "exploder"
-      run: go build .\src\lib\exploder.go
+      run: go build -o .\src\lib\exploder.exe .\src\lib\exploder.go
 
     - name: compile GO library "imploder"
-      run: go build .\src\lib\imploder.go
+      run: go build -o .\src\lib\imploder.exe .\src\lib\imploder.go
     
     - name: run SSAtool directly
       run: python .\src\SSAtool.py -v
