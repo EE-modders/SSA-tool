@@ -106,7 +106,7 @@ class SSA:
             if not os.path.exists(folder):
                 os.makedirs(folder)
 
-            # since FUCKING WINDOWS shit has "\" instead "/" like every other normal OS I need to check for it
+            # since FUCKING WINDOWS shit has "\" instead of "/" like every other normal OS, I need to check for it
             if not windows:
                 #print("found Linux: replacing \\ with /")
                 path = path.replace("\\", "/")
