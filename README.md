@@ -17,9 +17,9 @@ You can also use the CLI interface via a terminal.
 The software runs standalone and no installation is needed. 
 
 #### Supported games
-- Empire Earth (base game)
+- Empire Earth (CD)
 - Empire Earth AoC (addon)
-
+- Empire Earth Gold Edition (GOG)
 
 ## Contribute
 - if you have an issue or suggestion feel free to create an [issue](https://github.com/EE-modders/SSA-tool/issues) or [pull request](https://github.com/EE-modders/SSA-tool/pulls) 
