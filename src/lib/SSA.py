@@ -32,7 +32,7 @@ class SSA:
 
             magic = ssafile.read(4)
             if self.header["magic"] != magic:
-                raise ImportError("ERROR: this is not a proper SSA file", magic.decode())
+                raise ImportError("ERROR: this is not a (supported) SSA file", magic.decode())
 
             self.header["version_major"] = read_int_buff(4)
             self.header["version_minor"] = read_int_buff(4)
@@ -77,7 +77,7 @@ class SSA:
         print(output)
         return files
 
-    def extract(self, files_list: list, ssa_binary: bytes, decompress=False):        
+    def extract(self, files_list: list, ssa_binary: bytes, decompress=False):
         # check for OS
         os_delimiter = ""
         if sys.platform[:3] == "win":            
