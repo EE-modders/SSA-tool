@@ -24,17 +24,18 @@ info_only = False
 
 print("### SSA Extractor for Empire Earth made by zocker_160")
 print("### version %s" % version)
-print("""
-###
+print(
+"""###
 ### if you have any issue, pls feel free to report it:
 ### https://github.com/EE-modders/SSA-tool/issues
 ###
-###----------------------------------------------\n
-""")
+###----------------------------------------------
+"""
+)
 
 def show_help():
-    print("""
-USAGE: SSAtool [options] <SSAfile>
+    print(
+"""USAGE: SSAtool [options] <SSAfile>
 or you can just drag & drop the SSA file onto this executable
 
 possible options:
@@ -42,7 +43,7 @@ possible options:
 --info          only show the list of files inside this archive
 -nc             "no confirm" disables all confirmation questions
                 (useful for batch conversion)
-    """)
+""")
     if confirm: input("press Enter to close........")
     sys.exit()
 
