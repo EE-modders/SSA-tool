@@ -442,7 +442,7 @@ local int outf(void *how, unsigned char *buf, unsigned len)
     return fwrite(buf, 1, len, (FILE *)how) != len;
 }
 
-/* Decompress a PKWare Compression Library stream from stdin to stdout */
+/* Decompress a PKWare Compression Library | needs inputfile, outputfile as arguments */
 
 int main(int argc, char *argv[])
 {
