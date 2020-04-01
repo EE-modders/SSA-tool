@@ -98,10 +98,9 @@ if info_only:
     SSA.print_files_list()
     show_exit()
 
-res = "y"
 res = input("Do you want to decompress the files? (Y/n) ")
 
-if res == "y" or res == "Y":
+if res == "y" or res == "Y" or not res:
     SSA.extract(SSA.get_files_list(), SSA.SSAbody, decompress=True)
 elif res == "n":
     SSA.extract(SSA.get_files_list(), SSA.SSAbody)
