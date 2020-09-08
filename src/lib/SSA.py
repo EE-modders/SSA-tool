@@ -119,7 +119,6 @@ class SSA:
 
                 try:
                     DCL_tmp = DCL(empty=False, data=data_blob)
-                    #DCL_tmp.decompress_sub(outputfile=path)
                     DCL_tmp.decompress(outputfile=path)
                     del DCL_tmp
                 except TypeError as err:

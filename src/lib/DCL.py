@@ -17,7 +17,7 @@ from io import BytesIO
 class DCL:
     def __init__(self, empty: bool, raw_data=False, data=b''):
         if not empty and not raw_data:
-            self.magic, self.size, self.unknown, self.data = self.read_header(data)
+            self.magic, self.uncompressed_size, self.unknown, self.data = self.read_header(data)
         if raw_data:
             self.data = data
     
@@ -27,11 +27,11 @@ class DCL:
         magic = fb.read(4)
         if magic != b'PK01':
             raise TypeError(magic)
-        size = fb.read(4)
+        uncompressed_size = fb.read(4)
         unknown = fb.read(4)
         data = fb.read(-1)
 
-        return magic, size, unknown, data
+        return magic, uncompressed_size, unknown, data
 
     # def decompress(self, outputfile: str):
     #     tmpfile = ""
@@ -72,23 +72,22 @@ class DCL:
     #         #print(outputfile.split(os_delimiter)[-2] + os_delimiter + outputfile.split(os_delimiter)[-1])
 
     def decompress(self, outputfile: str):
+        current_loc = os.path.dirname(os.path.abspath(__file__))
+
         if sys.platform[:3] != "win":
-            is_windows = False
+            libblast = ctypes.CDLL(os.path.join(current_loc, "libblast.so"))
         else:
-            is_windows = True
+            libblast = ctypes.CDLL(os.path.join(current_loc, "libblast.dll"))
 
-        if is_windows:
-            libblast = ctypes.CDLL(".\\libblast.dll")
-        else:
-            libblast = ctypes.CDLL("./libblast.so")
-
-        libblast.decompress_bytes.argtypes = [ ctypes.c_char_p, ctypes.c_char_p ]    
+        libblast.decompress_bytes.argtypes = [ ctypes.c_ulong, ctypes.c_char_p, ctypes.c_char_p ]    
         libblast.decompress_bytes.restype = ctypes.c_int
 
         b_outputfile = outputfile.encode()
 
-        return libblast.decompress_bytes(self.data, b_outputfile)
+        return libblast.decompress_bytes(ctypes.c_ulong(len(self.data)), self.data, b_outputfile)
 
+
+    ## old slow shit, that sucks on Linux use decompress() instead!
     def decompress_sub(self, outputfile: str):
         tmpfile = ""
         tmpname = "DCLTMP"

@@ -434,6 +434,9 @@ int blast(blast_in infun, void *inhow, blast_out outfun, void *outhow,
 #include <stdlib.h>
 
 #define CHUNK 16384
+//#define CHUNK 32768
+
+unsigned long CHUNKSIZE;
 
 local unsigned inf(void *how, unsigned char **buf)
 {
@@ -449,18 +452,22 @@ local int outf(void *how, unsigned char *buf, unsigned len)
 }
 
 
-local unsigned inarray(char *how, unsigned char **buf)
+local unsigned inarrayf(char *how, unsigned char **buf)
 {
 	static unsigned char hold[CHUNK];
-	int size_input = sizeof(how);
+	unsigned long size_input = sizeof(how);
 	
+    printf("FILE SIZE: %li\n", size_input);
+
 	*buf = hold;
 	
 	if (CHUNK >= size_input){
+        printf("SMALLER\n");
 		memcpy(hold, how, size_input * sizeof(char));
 		
 		return size_input;
 	}else{
+        printf("BIGGER\n");
 		memcpy(hold, how, size_input * sizeof(char));
 		
 		int newsize = size_input - CHUNK;
@@ -477,21 +484,38 @@ local unsigned inarray(char *how, unsigned char **buf)
 }
 
 
-int decompress_bytes(char *inputbytes, char *outputfilename)
+local unsigned inarray2f(char *how, unsigned char **buf)
+{
+	unsigned char hold[CHUNKSIZE];
+    *buf = how;
+    
+    return CHUNKSIZE;
+}
+
+/* Decompress a PKWare Compression Library stream
+*  #####
+*  decompress_bytes( length_of_inputbytes, char_array_of_inputbytes, char_array_of_string_for_filename )
+*/
+
+int decompress_bytes(unsigned long length, char *inputbytes, char *outputfilename)
 {
     int ret;
     unsigned left;
 
+    CHUNKSIZE = length;
+
+    // printf("Starting C code......\n");
+    // printf("compressed data size: %li\n", CHUNKSIZE);
 
     FILE *outputfile = fopen(outputfilename, "wb");
 
-    // printf("TEMP FILE: %s\n", inputname);
-    printf("OUTPUT FILE: %s\n", outputfilename);
+    // printf("TEMP FILENAME: %s\n", inputname);
+    // printf("OUTPUT FILENAME: %s\n", outputfilename);
 
     /* decompress to outputfile */
     left = 0;
     // freopen("output.txt", "w", stdout);
-	ret = blast(inarray, inputbytes, outf, outputfile, &left, NULL);    
+	ret = blast(inarray2f, inputbytes, outf, outputfile, &left, NULL);    
     if (ret != 0)
         fprintf(stderr, "decompress error in libblast: %d\n", ret);
 
@@ -507,16 +531,16 @@ int decompress_bytes(char *inputbytes, char *outputfilename)
     return ret;
 }
 
-/*
+/* main function for testing and debugging only
+
 void main()
 {
-	char byteArray[] = { 0x00, 0x04, 0x82, 0x24, 0x25, 0x8F, 0x80, 0x7F };
-	
-	printf("file size: %li\n", sizeof(test));
-	
-	for (int loop=0; loop < 9; loop++)
-		printf("%x\n", buf[loop]);
+    char filename[] = "testfile";
 
-	//int value = decompress_bytes(byteArray);
+	char byteArray[] = { 0x00, 0x04, 0x82, 0x24, 0x25, 0x8F, 0x80, 0x7F };
+
+	printf("REAL file size: %li\n", CHUNKSIZE);
+	
+    int value = decompress_bytes(sizeof(byteArray), byteArray, filename);
 }
 */
