@@ -33,44 +33,6 @@ class DCL:
 
         return magic, uncompressed_size, unknown, data
 
-    # def decompress(self, outputfile: str):
-    #     tmpfile = ""
-    #     tmpname = "DCLTMP"
-    #     os_delimiter = ""
-    #     # check for OS
-    #     if sys.platform[:3] != "win":
-    #         is_windows = False
-    #     else:  
-    #         is_windows = True
-    # 
-    #     # print(os.getcwd())
-    #     if is_windows:
-    #         os_delimiter = "\\"
-    #         decompressor = ctypes.cdll.LoadLibrary("..\\lib\\blast_old\\libblast.dll")
-    #     else:
-    #         os_delimiter = "/"
-    #         decompressor = ctypes.cdll.LoadLibrary("../lib/blast_old/libblast.so")
-    #         
-    #     tmpfile = tempfile.gettempdir() + os_delimiter + tmpname
-    # 
-    #     # string_in = tmpfile.encode('ISO-8859-15')
-    #     # string_out = outputfile.encode('ISO-8859-15')
-    # 
-    #     string_in = tmpfile.encode('utf-8')
-    #     string_out = outputfile.encode('utf-8')
-    # 
-    # 
-    #     # write tempfile
-    #     with open(tmpfile, "wb") as tmpfile:
-    #         tmpfile.write(self.data)
-    # 
-    #     result = decompressor.main(ctypes.c_char_p(string_in), ctypes.c_char_p(string_out))
-    # 
-    #     if result != 0:
-    #         print("ERROR: %s" % result)
-    #         print(outputfile)
-    #         #print(outputfile.split(os_delimiter)[-2] + os_delimiter + outputfile.split(os_delimiter)[-1])
-
     def decompress(self, outputfile: str):
         current_loc = os.path.dirname(os.path.abspath(__file__))
 
