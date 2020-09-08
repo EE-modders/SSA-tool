@@ -28,7 +28,7 @@ jobs:
       uses: kurocha/setup-cpp@v1
       
     - name: compile C library "blast"
-      run: gcc ./src/lib/libblast.c -o ./src/lib/libblast.so
+      run: gcc -fPIC -shared ./src/lib/libblast.c -o ./src/lib/libblast.so
     
     - name: run SSAtool directly
       run: python ./src/SSAtool.py -v

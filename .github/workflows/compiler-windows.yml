@@ -24,7 +24,7 @@ jobs:
       
       
     - name: compile C library "blast"
-      run: gcc .\src\lib\libblast.c -o .\src\lib\libblast.dll
+      run: gcc -fPIC -shared .\src\lib\libblast.c -o .\src\lib\libblast.dll
     
     - name: run SSAtool directly
       run: python .\src\SSAtool.py -v
