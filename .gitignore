@@ -1,7 +1,10 @@
 .directory
 __*
 bin/
+
 *.desktop
+*.so
+*.dll
 
 src/test.py
 
