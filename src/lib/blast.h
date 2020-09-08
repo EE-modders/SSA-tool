@@ -2,6 +2,8 @@
   Copyright (C) 2003, 2012, 2013 Mark Adler
   version 1.3, 24 Aug 2013
 
+  updated by zocker_160 for SSA-tool, 8 Sep 2020
+  
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the author be held liable for any damages
   arising from the use of this software.
@@ -35,7 +37,7 @@
  */
 
 
-typedef unsigned (*blast_in)(void *how, unsigned char **buf);
+typedef unsigned (*blast_in)(char *how, unsigned char **buf);
 typedef int (*blast_out)(void *how, unsigned char *buf, unsigned len);
 /* Definitions for input/output functions passed to blast().  See below for
  * what the provided functions need to do.
