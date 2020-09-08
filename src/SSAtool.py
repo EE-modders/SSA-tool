@@ -15,7 +15,7 @@ from lib.SSA import SSA
 importlib.reload(lib)
 
 
-version = "0.4.1"
+version = "0.4.2"
 
 magic_number_compressed = b'PK01'
 magic_number_SSA = b'rass'
