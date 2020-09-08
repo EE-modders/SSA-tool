@@ -25,7 +25,7 @@ class SSA:
         self.header_length = 16
 
     def read_from_file(self, filename: str):
-        with open(filename, 'rb') as ssafile:            
+        with open(filename, 'rb') as ssafile:
             read_int_buff = lambda x: int.from_bytes(ssafile.read(x), byteorder="little", signed=False)
 
             print("parsing........")
@@ -44,7 +44,7 @@ class SSA:
             self.SSAbody = ssafile.read(-1)
 
     def get_files_list(self):
-        body_bin = BytesIO(self.SSAbody)                
+        body_bin = BytesIO(self.SSAbody)
         file_bin = BytesIO(body_bin.read(self.header["data_offset"]))
         del body_bin
 
@@ -79,7 +79,7 @@ class SSA:
 
     def extract(self, files_list: list, ssa_binary: bytes, decompress=False):
         # check for OS
-        if sys.platform[:3] == "win":            
+        if sys.platform[:3] == "win":
             windows = True
         else:
             windows = False
@@ -105,11 +105,11 @@ class SSA:
 
             # since FUCKING WINDOWS shit has "\" instead of "/" like every other normal OS, I need to check for it
             if not windows:
-                path = path.replace("\\", "/")                
+                path = path.replace("\\", "/")
             print(path) # print path so user gets feedback that something happens
 
             ## decompressor
-            if decompress:                
+            if decompress:
                 path = os.path.join(os.getcwd(), path)
 
                 data_blob = b''
