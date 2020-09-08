@@ -79,13 +79,10 @@ class SSA:
 
     def extract(self, files_list: list, ssa_binary: bytes, decompress=False):
         # check for OS
-        os_delimiter = ""
         if sys.platform[:3] == "win":            
             windows = True
-            os_delimiter = "\\"
         else:
             windows = False
-            os_delimiter = "/"
         
         if decompress:
             export_folder = "extracted_decompressed"
@@ -112,11 +109,8 @@ class SSA:
             print(path) # print path so user gets feedback that something happens
 
             ## decompressor
-            if decompress:
-                if windows:
-                    path = os.getcwd() + os_delimiter + path
-                else:
-                    path = os.getcwd() + os_delimiter + path
+            if decompress:                
+                path = os.path.join(os.getcwd(), path)
 
                 data_blob = b''
                 ssa.seek(asset[1] - self.header_length) # we need to subtract header length because the SSAbody doesn't contain the header anymore (after read_from_file())
