@@ -24,13 +24,13 @@ jobs:
       
       
     - name: compile C library "blast"
-      run: gcc -o .\src\lib\blast_args.exe .\src\lib\blast_args.c
+      run: gcc .\src\lib\libblast.c -o .\src\lib\libblast.dll
     
     - name: run SSAtool directly
       run: python .\src\SSAtool.py -v
     
     - name: compile SSAtool
-      run: pyinstaller -F --add-data ".\src\lib\blast_args.exe;." .\src\SSAtool.py
+      run: pyinstaller -F --add-data ".\src\lib\libblast.dll;." .\src\SSAtool.py
       
     - name: run compiled version
       run: .\dist\SSAtool.exe -v

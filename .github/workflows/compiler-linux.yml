@@ -28,13 +28,13 @@ jobs:
       uses: kurocha/setup-cpp@v1
       
     - name: compile C library "blast"
-      run: gcc -o ./src/lib/blast_args ./src/lib/blast_args.c
+      run: gcc ./src/lib/libblast.c -o ./src/lib/libblast.so
     
     - name: run SSAtool directly
       run: python ./src/SSAtool.py -v
     
     - name: compile SSAtool
-      run: pyinstaller -F --add-data "./src/lib/blast_args:." ./src/SSAtool.py
+      run: pyinstaller -F --add-data "./src/lib/libblast.so:." ./src/SSAtool.py
       
     - name: run compiled version
       run: ./dist/SSAtool -v
