@@ -77,7 +77,7 @@ class SSA:
         print(output)
         return files
 
-    def extract(self, files_list: list, ssa_binary: bytes, decompress=False):
+    def extract(self, files_list: list, ssa_binary: bytes, decompress=False, silent=False):
         # check for OS
         if sys.platform[:3] == "win":
             windows = True
@@ -106,7 +106,8 @@ class SSA:
             # since FUCKING WINDOWS shit has "\" instead of "/" like every other normal OS, I need to check for it
             if not windows:
                 path = path.replace("\\", "/")
-            print(path) # print path so user gets feedback that something happens
+            if not silent:
+                print(path) # print path so user gets feedback that something happens
 
             ## decompressor
             if decompress:

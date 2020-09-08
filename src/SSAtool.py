@@ -21,6 +21,7 @@ magic_number_compressed = b'PK01'
 magic_number_SSA = b'rass'
 confirm = True
 info_only = False
+silent = False
 
 print("### SSA Extractor for Empire Earth made by zocker_160")
 print("### version %s" % version)
@@ -43,6 +44,7 @@ possible options:
 --info          only show the list of files inside this archive
 -nc             "no confirm" disables all confirmation questions
                 (useful for batch conversion)
+--silent        no output during extract (faster)
 """)
     if confirm: input("press Enter to close........")
     sys.exit()
@@ -66,6 +68,9 @@ for i, arg in enumerate(sys.argv):
         parameter_list.append(i)
     if arg == "--info":
         info_only = True
+        parameter_list.append(i)
+    if arg == "--silent":
+        silent = True
         parameter_list.append(i)
 
 # remove commandline parameters
@@ -101,9 +106,9 @@ if info_only:
 res = input("Do you want to decompress the files? (Y/n) ")
 
 if res == "y" or res == "Y" or not res:
-    SSA.extract(SSA.get_files_list(), SSA.SSAbody, decompress=True)
+    SSA.extract(SSA.get_files_list(), SSA.SSAbody, decompress=True, silent=silent)
 elif res == "n":
-    SSA.extract(SSA.get_files_list(), SSA.SSAbody)
+    SSA.extract(SSA.get_files_list(), SSA.SSAbody, silent=silent)
 else:
     print("ERROR: invalid input!")
     show_exit()
