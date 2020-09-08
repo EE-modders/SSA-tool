@@ -461,6 +461,9 @@ int main(void)
     if (left)
         fprintf(stderr, "blast warning: %u unused bytes of input\n", left);
 
+	/*print error code*/
+	printf("error code %d\n", ret);
+	
     /* return blast() error code */
     return ret;
 }
