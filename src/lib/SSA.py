@@ -124,11 +124,12 @@ class SSA:
 
                 try:
                     DCL_tmp = DCL(empty=False, data=data_blob)
-                    DCL_tmp.decompress_sub(path)
+                    #DCL_tmp.decompress_sub(outputfile=path)
+                    DCL_tmp.decompress(outputfile=path)
                     del DCL_tmp
                 except TypeError as err:
                     # print("This file is not compressed; magic: %s\n%s" % (err.args[0], path.split(os_delimiter)[-1]))
-                    with open(path, 'wb') as newfile:
+                    with open(path, 'wb') as newfile: # some files are not compressed, so they do not have the PK01 header
                         newfile.write(data_blob)
 
             else:

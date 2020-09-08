@@ -6,23 +6,26 @@ Created on 25.01.2020 31:01 CET
 @author: zocker_160
 """
 
-import sys
+import ctypes
 import os
-# import ctypes
-import tempfile
 import subprocess
+import sys
+import tempfile
 from io import BytesIO
 
+
 class DCL:
-    def __init__(self, empty: bool, data=b''):
-        if not empty:
+    def __init__(self, empty: bool, raw_data=False, data=b''):
+        if not empty and not raw_data:
             self.magic, self.size, self.unknown, self.data = self.read_header(data)
+        if raw_data:
+            self.data = data
     
     def read_header(self, data: bytes):
         fb = BytesIO(data)
 
         magic = fb.read(4)
-        if magic != b'PK01':            
+        if magic != b'PK01':
             raise TypeError(magic)
         size = fb.read(4)
         unknown = fb.read(4)
@@ -67,6 +70,24 @@ class DCL:
     #         print("ERROR: %s" % result)
     #         print(outputfile)
     #         #print(outputfile.split(os_delimiter)[-2] + os_delimiter + outputfile.split(os_delimiter)[-1])
+
+    def decompress(self, outputfile: str):
+        if sys.platform[:3] != "win":
+            is_windows = False
+        else:
+            is_windows = True
+
+        if is_windows:
+            libblast = ctypes.CDLL(".\\libblast.dll")
+        else:
+            libblast = ctypes.CDLL("./libblast.so")
+
+        libblast.decompress_bytes.argtypes = [ ctypes.c_char_p, ctypes.c_char_p ]    
+        libblast.decompress_bytes.restype = ctypes.c_int
+
+        b_outputfile = outputfile.encode()
+
+        return libblast.decompress_bytes(self.data, b_outputfile)
 
     def decompress_sub(self, outputfile: str):
         tmpfile = ""
