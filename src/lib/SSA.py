@@ -77,7 +77,7 @@ class SSA:
         print(output)
         return files
 
-    def extract(self, files_list: list, ssa_binary: bytes, decompress=False, silent=False):
+    def extract(self, files_list: list, ssa_binary: bytes, outputfolder: str, decompress=False, silent=False):
         # check for OS
         if sys.platform[:3] == "win":
             windows = True
@@ -85,17 +85,17 @@ class SSA:
             windows = False
         
         if decompress:
-            export_folder = "extracted_decompressed"
+            outputfolder += "extracted_decompressed"
             print("extracting & decompressing........")
         else:
-            export_folder = "extracted"
+            outputfolder += "extracted"
             print("extracting........")
         ssa = BytesIO(ssa_binary)
 
 
-        if not os.path.exists(export_folder):
-            os.makedirs(export_folder)
-        os.chdir(export_folder)
+        if not os.path.exists(outputfolder):
+            os.makedirs(outputfolder)
+        os.chdir(outputfolder)
 
         for asset in files_list:
             path = str(asset[0])
