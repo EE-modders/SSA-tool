@@ -8,12 +8,15 @@ Created on 22.01.2020 20:08 CET
 
 import os
 import sys
-import importlib
-import lib
 
-from lib.SSA import SSA
-
-importlib.reload(lib)
+if __name__ == "__main__":
+    import importlib
+    import lib
+    importlib.reload(lib)
+    
+    from lib.SSA import SSA
+else:
+    from .lib.SSA import SSA
 
 
 version = "0.4.2"

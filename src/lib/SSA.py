@@ -11,7 +11,7 @@ import sys
 import tempfile
 from io import BytesIO
 
-from lib.DCL import DCL
+from .DCL import DCL
 
 class SSA:
     def __init__(self, version_major=0, version_minor=0, data_offset=0, data_body=b''):
