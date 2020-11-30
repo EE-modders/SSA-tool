@@ -24,7 +24,6 @@ version = "0.4.2"
 magic_number_compressed = b'PK01'
 magic_number_SSA = b'rass'
 confirm = True
-info_only = False
 silent = False
 
 def show_help():
@@ -58,10 +57,6 @@ def main(inputfile: str, outputfolder: str, decompress=True, log=False):
     except ImportError as err:
         print(err.args[0] + "imported magic number: " + err.args[1])
 
-    if info_only:
-        SSAd.print_files_list()
-        show_exit()
-
     ## path to output folder has to end with an os.sep
     if outputfolder != "" and not outputfolder.endswith(os.sep):
         outputfolder += os.sep
@@ -73,6 +68,11 @@ def main(inputfile: str, outputfolder: str, decompress=True, log=False):
 
     print("done!")
 
+def getFileList(inputfile: str) -> list:
+    SSAi = SSA()
+    SSAi.read_from_file(inputfile)
+
+    return SSAi.get_files_list()
 
 if __name__ == "__main__":
     print("### SSA Extractor for Empire Earth made by zocker_160")
@@ -98,8 +98,9 @@ if __name__ == "__main__":
             confirm = False
             parameter_list.append(i)
         if arg == "--info":
-            info_only = True
-            parameter_list.append(i)
+            pass
+            #info_only = True
+            #parameter_list.append(i)
         if arg == "--silent":
             silent = True
             parameter_list.append(i)
