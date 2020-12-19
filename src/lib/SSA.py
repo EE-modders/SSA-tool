@@ -43,7 +43,7 @@ class SSA:
 
             self.SSAbody = ssafile.read(-1)
 
-    def get_files_list(self):
+    def get_files_list(self, char_encoding="ISO-8859-15"):
         body_bin = BytesIO(self.SSAbody)
         file_bin = BytesIO(body_bin.read(self.header["data_offset"]))
         del body_bin
@@ -61,7 +61,7 @@ class SSA:
             #print(length)
             filename = file_bin.read(length-1) # the string itself is only length - 1 long
             file_bin.read(1) # delimiter 0x00
-            files.append( [ filename.decode('ISO-8859-15'), read_int_buff(4), read_int_buff(4), read_int_buff(4) ] )
+            files.append( [ filename.decode(char_encoding), read_int_buff(4), read_int_buff(4), read_int_buff(4) ] )
 
         return files
 
