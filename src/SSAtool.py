@@ -46,7 +46,7 @@ def show_exit():
     sys.exit()
 
 
-def main(inputfile: str, outputfolder: str, decompress=True, log=False):
+def main(inputfile: str, outputfolder: str, decompress=True, log=False, encoding=None):
     # start extraction process
     SSAd = SSA()
 
@@ -61,18 +61,21 @@ def main(inputfile: str, outputfolder: str, decompress=True, log=False):
     if outputfolder != "" and not outputfolder.endswith(os.sep):
         outputfolder += os.sep
 
-    if decompress:
-        SSAd.extract(SSAd.get_files_list(), SSAd.SSAbody, outputfolder=outputfolder, silent=log, decompress=True)
+    if encoding:
+        SSAd.extract(SSAd.get_files_list(char_encoding=encoding), SSAd.SSAbody, outputfolder=outputfolder, silent=log, decompress=decompress)
     else:
-        SSAd.extract(SSAd.get_files_list(), SSAd.SSAbody, outputfolder=outputfolder, silent=log)
+        SSAd.extract(SSAd.get_files_list(), SSAd.SSAbody, outputfolder=outputfolder, silent=log, decompress=decompress)
 
     print("done!")
 
-def getFileList(inputfile: str) -> list:
+def getFileList(inputfile: str, encoding=None) -> list:
     SSAi = SSA()
     SSAi.read_from_file(inputfile)
 
-    return SSAi.get_files_list()
+    if encoding:
+        return SSAi.get_files_list(char_encoding=encoding)
+    else:
+        return SSAi.get_files_list()
 
 if __name__ == "__main__":
     print("### SSA Extractor for Empire Earth made by zocker_160")
