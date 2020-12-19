@@ -98,9 +98,8 @@ if __name__ == "__main__":
             confirm = False
             parameter_list.append(i)
         if arg == "--info":
-            pass
-            #info_only = True
-            #parameter_list.append(i)
+            info_only = True
+            parameter_list.append(i)
         if arg == "--silent":
             silent = True
             parameter_list.append(i)
