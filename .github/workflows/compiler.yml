@@ -36,8 +36,8 @@ jobs:
     - name: run SSAtool directly
       run: python ./src/SSAtool.py -v
     
-    - name: compile SSAtool
-      run: pyinstaller --add-data "./src/lib/cdcl.so:." ./src/SSAtool.py
+    - name: pack SSAtool
+      run: pyinstaller -F --add-data "./src/lib/cdcl.so:." ./src/SSAtool.py
       
     - name: run compiled version
       run: ./dist/SSAtool -v
@@ -62,6 +62,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pyinstaller
+        pip install cython
     - name: python version
       run: python --version
     - name: pyinstaller version
