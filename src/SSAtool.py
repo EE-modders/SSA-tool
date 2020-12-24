@@ -78,7 +78,7 @@ def getFileList(inputfile: str, encoding=None) -> list:
         return SSAi.get_files_list()
 
 
-def cli_params():
+def cli_params(show_help=False):
     parser = argparse.ArgumentParser(description="SSA Extractor for Empire Earth made by zocker_160", epilog="You can also just drag & drop the SSA file onto this executable!")
 
     parser.add_argument("SSAfile", help="SSA archive file")
@@ -88,10 +88,17 @@ def cli_params():
     #parser.add_argument("-s", "--silent", dest="silent", action="store_true", help="no output during extract (faster)")
     parser.add_argument("-v", "--version", action="version", version=VERSION)
 
+    if show_help: 
+        parser.print_help()
+        show_exit()
+
     return parser.parse_args()
 
 if __name__ == "__main__":
     show_info()
+
+    if len(sys.argv) <= 1: 
+        cli_params(show_help=True)
 
     CLI = cli_params()
 
