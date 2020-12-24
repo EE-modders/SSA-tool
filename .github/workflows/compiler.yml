@@ -33,16 +33,16 @@ jobs:
     - name: rename C module
       run: mv ./src/lib/cdcl* ./src/lib/cdcl.so
 
-    - name: run SSAtool directly
+    - name: run source SSAtool
       run: python ./src/SSAtool.py -v
     
     - name: pack SSAtool
       run: pyinstaller -F --add-data "./src/lib/cdcl.so:." ./src/SSAtool.py
       
-    - name: run compiled version
+    - name: run packed version
       run: ./dist/SSAtool -v
 
-    - name: save compiled SSAtool
+    - name: save packed SSAtool
       uses: actions/upload-artifact@master
       with:
         name: SSAtool_linux
@@ -62,33 +62,24 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pyinstaller
-        pip install cython
     - name: python version
       run: python --version
     - name: pyinstaller version
       run: pyinstaller --version
-      
-    - name: compile C module
-      run: |
-        cd .\src\lib\
-        python dclgen.py build_ext --inplace
-
-    - name: show dir
-      run: dir .\src\lib\
 
     - name: compile C library "blast"
-      run: gcc -fPIC -shared .\src\lib\libblast.c -o .\src\lib\libblast.dll
+      run: gcc .\src\lib\blast_args.c -o .\src\lib\blast_args.exe
     
     - name: run SSAtool directly
       run: python .\src\SSAtool.py -v
     
-    - name: compile SSAtool
-      run: pyinstaller -F --add-data ".\src\lib\libblast.dll;." .\src\SSAtool.py
+    - name: pack SSAtool
+      run: pyinstaller -F --add-data ".\src\lib\blast_args.exe;." .\src\SSAtool.py
       
-    - name: run compiled version
+    - name: run packed version
       run: .\dist\SSAtool.exe -v
 
-#    - name: save compiled executable
+#    - name: save packed executable
 #      uses: actions/upload-artifact@master
 #      with:
 #        name: SSAtool_windows
