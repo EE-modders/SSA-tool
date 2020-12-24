@@ -522,12 +522,13 @@ int decompress_bytes(unsigned long length, char *inputbytes, char *outputfilenam
     //fclose(inputfile);
     fclose(outputfile);
 
-    /* count any leftover bytes - commendted out because it somehow doesn't terminate :( */
-    // while (getchar() != EOF)
-    //     left++;
-    // if (left)
-    //     fprintf(stderr, "blast warning: %u unused bytes of input\n", left);
-    /* return blast() error code */
+    /* count any leftover bytes - commendted out because it somehow doesn't terminate :(
+    * while (getchar() != EOF)
+    *     left++;
+    * if (left)
+    *     fprintf(stderr, "blast warning: %u unused bytes of input\n", left);
+    * return blast() error code
+    */
     return ret;
 }
 
