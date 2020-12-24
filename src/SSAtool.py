@@ -8,6 +8,7 @@ Created on 22.01.2020 20:08 CET
 
 import os
 import sys
+import argparse
 
 if __name__ == "__main__":
     import importlib
@@ -19,27 +20,21 @@ else:
     from .lib.SSA import SSA
 
 
-version = "0.4.2"
+VERSION = "0.4.3"
 
 magic_number_compressed = b'PK01'
 magic_number_SSA = b'rass'
-confirm = True
-silent = False
 
-def show_help():
-    print(
-"""USAGE: SSAtool [options] <SSAfile>
-or you can just drag & drop the SSA file onto this executable
 
-possible options:
--h, --help, -v  show this help / version information
---info          only show the list of files inside this archive
--nc             "no confirm" disables all confirmation questions
-                (useful for batch conversion)
---silent        no output during extract (faster)
-""")
-    if confirm: input("press Enter to close........")
-    sys.exit()
+def show_info():
+    print("### SSA Extractor for Empire Earth made by zocker_160")
+    print("### version %s" % VERSION)
+    print("###")
+    print("### if you have any issue, pls feel free to report it:")
+    print("### https://github.com/EE-modders/SSA-tool/issues")
+    print("###")
+    print("###----------------------------------------------\n")
+
 
 def show_exit():
     input("\npress Enter to close.......\n")
@@ -68,6 +63,11 @@ def main(inputfile: str, outputfolder: str, decompress=True, log=False, encoding
 
     print("done!")
 
+def showFileList(inputfile: str):
+    SSAi = SSA()
+    SSAi.read_from_file(inputfile)
+    SSAi.print_files_list()
+
 def getFileList(inputfile: str, encoding=None) -> list:
     SSAi = SSA()
     SSAi.read_from_file(inputfile)
@@ -77,49 +77,35 @@ def getFileList(inputfile: str, encoding=None) -> list:
     else:
         return SSAi.get_files_list()
 
+
+def cli_params():
+    parser = argparse.ArgumentParser(description="SSA Extractor for Empire Earth made by zocker_160", epilog="You can also just drag & drop the SSA file onto this executable!")
+
+    parser.add_argument("SSAfile", help="SSA archive file")
+
+    #parser.add_argument("-nc", dest="confirm", action="store_true", help="\"no confirm\" disables all confirmation questions (useful for batch conversion)")
+    parser.add_argument("-i", "--info", dest="info_only", action="store_true", help="only show the list of files inside this archive")
+    #parser.add_argument("-s", "--silent", dest="silent", action="store_true", help="no output during extract (faster)")
+    parser.add_argument("-v", "--version", action="version", version=VERSION)
+
+    return parser.parse_args()
+
 if __name__ == "__main__":
-    print("### SSA Extractor for Empire Earth made by zocker_160")
-    print("### version %s" % version)
-    print("""###
-### if you have any issue, pls feel free to report it:
-### https://github.com/EE-modders/SSA-tool/issues
-###
-###----------------------------------------------
-    """
-    )
+    show_info()
 
-    if len(sys.argv) <= 1:
-        show_help()
+    CLI = cli_params()
 
-    parameter_list = list()
+    #print(CLI)
 
-    for i, arg in enumerate(sys.argv):
-        if arg == "-h" or arg == "--help" or arg == "-v":
-            confirm = False
-            show_help()
-        if arg == "-nc":
-            confirm = False
-            parameter_list.append(i)
-        if arg == "--info":
-            info_only = True
-            parameter_list.append(i)
-        if arg == "--silent":
-            silent = True
-            parameter_list.append(i)
+    filename: str = CLI.SSAfile
+    info_only: bool = CLI.info_only
 
-    # remove commandline parameters
-    parameter_list.sort(reverse=True)
-    for param in parameter_list:
-        sys.argv.pop(param)
-
-    try:
-        filename = sys.argv[1]
-    except IndexError:
-        print("ERROR: no file(s) specified!")
+    if not filename.endswith(".ssa"):
+        print("ERROR: invalid input file! Only SSA is supported!")
         show_exit()
 
-    if filename.split('.')[-1] != "ssa":
-        print("ERROR: invalid input file!")
+    if info_only:
+        showFileList(filename)
         show_exit()
 
     res = input("Do you want to decompress the files? (Y/n) ")
@@ -128,6 +114,6 @@ if __name__ == "__main__":
     else:
         res = False
 
-    main(inputfile=filename, outputfolder=sys.argv[2], decompress=res)
+    main(inputfile=filename, outputfolder="", decompress=res)
 
-    if confirm: input("press Enter to close.......")
+    show_exit()
