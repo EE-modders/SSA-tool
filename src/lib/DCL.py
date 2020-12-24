@@ -34,6 +34,7 @@ class DCL:
         return magic, uncompressed_size, unknown, data
 
     def decompress(self, outputfile: str):
+    ## this shit does not work on Windows!! AHHH why is Windows such a piece of shit?
         current_loc = os.path.dirname(os.path.abspath(__file__))
 
         if sys.platform[:3] != "win":
