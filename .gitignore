@@ -7,5 +7,6 @@ bin/
 *.dll
 
 src/test.py
+src/lib/build
 
 testing/

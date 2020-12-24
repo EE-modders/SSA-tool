@@ -1,0 +1,86 @@
+name: Python Packaging
+
+on: [push]
+
+jobs:
+  Linux:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+        pip install cython
+    - name: python version
+      run: python --version
+    - name: pyinstaller version
+      run: pyinstaller --version
+    
+
+    - name: Setup C++ environment
+      uses: kurocha/setup-cpp@v1
+    
+    - name: compile C module
+      run: cd ./src/lib/ && python dclgen.py build_ext --inplace
+
+    - name: rename C module
+      run: mv ./src/lib/cdcl* ./src/lib/cdcl.so
+
+    - name: run source SSAtool
+      run: python ./src/SSAtool.py -v
+    
+    - name: pack SSAtool
+      run: pyinstaller -F --add-data "./src/lib/cdcl.so:." ./src/SSAtool.py
+      
+    - name: run packed version
+      run: ./dist/SSAtool -v
+
+    - name: save packed SSAtool
+      uses: actions/upload-artifact@master
+      with:
+        name: SSAtool_linux
+        path: ./dist/SSAtool
+
+  Windows:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+    - name: python version
+      run: python --version
+    - name: pyinstaller version
+      run: pyinstaller --version
+
+    - name: compile C library "blast"
+      run: gcc .\src\lib\blast_args.c -o .\src\lib\blast_args.exe
+    
+    - name: run SSAtool directly
+      run: python .\src\SSAtool.py -v
+    
+    - name: pack SSAtool
+      run: pyinstaller -F --add-data ".\src\lib\blast_args.exe;." .\src\SSAtool.py
+      
+    - name: run packed version
+      run: .\dist\SSAtool.exe -v
+
+    - name: save packed executable
+      uses: actions/upload-artifact@master
+      with:
+        name: SSAtool_windows
+        path: .\dist\
