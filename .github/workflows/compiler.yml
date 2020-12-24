@@ -79,8 +79,8 @@ jobs:
     - name: run packed version
       run: .\dist\SSAtool.exe -v
 
-#    - name: save packed executable
-#      uses: actions/upload-artifact@master
-#      with:
-#        name: SSAtool_windows
-#        path: .\dist\
+    - name: save packed executable
+      uses: actions/upload-artifact@master
+      with:
+        name: SSAtool_windows
+        path: .\dist\
