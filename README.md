@@ -20,7 +20,8 @@ The software runs standalone and no installation is needed.
 
 #### Supported games
 
-- Empire Earth (CD)
+- Empire Earth BETA
+- Empire Earth (CD/Retail)
 - Empire Earth AoC (addon)
 - Empire Earth Gold Edition (GOG)
 
