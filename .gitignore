@@ -5,6 +5,7 @@ bin/
 *.desktop
 *.so
 *.dll
+*.bak
 
 src/test.py
 src/lib/build
