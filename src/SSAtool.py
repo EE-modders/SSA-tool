@@ -15,9 +15,9 @@ if __name__ == "__main__":
     import lib
     importlib.reload(lib)
     
-    from lib.SSA import SSA
+    from lib.SSAold import SSA
 else:
-    from .lib.SSA import SSA
+    from .lib.SSAold import SSA
 
 
 VERSION = "0.4.3"
