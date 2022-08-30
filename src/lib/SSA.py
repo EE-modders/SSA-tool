@@ -6,9 +6,10 @@ Created on 28.08.2022 00:19 CET
 @author: zocker_160
 """
 
-import enum
 import os
 from io import BufferedReader
+
+from DCLnew import DCL
 
 
 def readInt(f: BufferedReader) -> int:
@@ -45,8 +46,9 @@ class Header:
         self.data_start_offset = data_start_offset
 
     def __str__(self) -> str:
-        return f"magic: {self.magic}, version: {self.version_major}.{self.version_minor}, dso: {self.data_start_offset}"
-
+        return f"magic: {self.magic}, " \
+            + f"version: {self.version_major}.{self.version_minor}, " \
+            + f"dso: {self.data_start_offset}"
 
 class FileEntry:
     path_length: int
@@ -74,7 +76,9 @@ class FileEntry:
         self.size = size
 
     def getPath(self, encoding: str) -> str:
-        return self.path.strip(b"\0").decode(encoding).replace("\\", os.sep)
+        return self.path.strip(b"\0") \
+            .decode(encoding) \
+            .replace("\\", os.sep)
 
     def __str__(self) -> str:
         return f"path: {self.path}, start: {self.start_offset}, end: {self.end_offset}, size: {self.size}"
@@ -141,8 +145,18 @@ class FileData:
         self.length = len(data)
         self.data = data
 
+    def isCompressed(self):
+        return self.data.startswith(b"PK01")
+
+    def getDecompressedData(self):
+        if self.isCompressed():
+            return DCL.parse(self.data).decompress()
+        else:
+            return self.data
+
     def __str__(self) -> str:
         return f"data length: {self.length}"
+
 
 class SSA:
 
@@ -204,9 +218,14 @@ class SSA:
             os.makedirs(os.path.dirname(path), exist_ok=True)
 
             with open(path, "wb") as f:
-                f.write(data.data)
+                if decompress:
+                    f.write(data.getDecompressedData())
+                else:
+                    f.write(data.data)
 
-            print(f"({i+1}/{len(self.file_index)})")
+            print(
+                f"({i+1}/{len(self.file_index)})",
+                "compressed" if data.isCompressed() else "raw")
 
     def printFileIndex(self):
         print("\n".join([str(x) for x in self.file_index]))
@@ -220,3 +239,4 @@ class SSA:
             encoding: {self.encoding}
         ]
         """
+
