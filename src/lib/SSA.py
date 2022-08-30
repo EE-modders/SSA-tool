@@ -9,7 +9,7 @@ Created on 28.08.2022 00:19 CET
 import os
 from io import BufferedReader
 
-from DCLnew import DCL
+from lib.DCL import DCL
 
 
 def readInt(f: BufferedReader) -> int:
