@@ -10,11 +10,9 @@ import os
 import sys
 import ctypes
 
-from io import BufferedReader, BytesIO
+from io import BytesIO
 
-
-def readInt(f: BufferedReader) -> int:
-    return int.from_bytes(f.read(4), byteorder="little", signed=False)
+from lib.Util import readInt
 
 class DecompressException(Exception):
     pass

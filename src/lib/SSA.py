@@ -10,10 +10,8 @@ import os
 from io import BufferedReader
 
 from lib.DCL import DCL
+from lib.Util import readInt
 
-
-def readInt(f: BufferedReader) -> int:
-    return int.from_bytes(f.read(4), byteorder="little", signed=False)
 
 class ParseException(Exception):
     pass
