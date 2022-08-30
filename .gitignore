@@ -7,6 +7,7 @@ bin/
 *.dll
 *.bak
 
+!__init*
 !libblast.dll
 !libblast.so
 
