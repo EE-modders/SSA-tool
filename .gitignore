@@ -7,6 +7,9 @@ bin/
 *.dll
 *.bak
 
+!libblast.dll
+!libblast.so
+
 src/test.py
 src/lib/build
 
