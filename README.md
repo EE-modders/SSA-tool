@@ -2,7 +2,9 @@
 
 Library and tools for working with Empire Earth SSA archive files
 
-#### what is this?
+**NOTE: SSA development has moved to the [Empire Earth Studio II repository](https://github.com/EE-modders/Empire-Earth-Studio-2).**
+
+### What is this?
 
 this is a SSA libary and a SSA tool, which can be used to unpack those archives.
 
