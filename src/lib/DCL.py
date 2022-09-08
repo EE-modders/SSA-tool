@@ -1,76 +1,69 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on 25.01.2020 31:01 CET
+Created on 29.08.2022 22:53 CET
 
 @author: zocker_160
 """
 
-#import ctypes
 import os
-import subprocess
 import sys
-import tempfile
+import ctypes
 
 from io import BytesIO
 
+from lib.Util import readInt
+
+class DecompressException(Exception):
+    pass
 
 class DCL:
-    def __init__(self, empty: bool, raw_data=False, data=b''):
-        if not empty and not raw_data:
-            self.magic, self.uncompressed_size, self.unknown, self.data = self.read_header(data)
-        if raw_data:
-            self.data = data
-    
-    def read_header(self, data: bytes):
-        fb = BytesIO(data)
 
-        magic = fb.read(4)
-        if magic != b'PK01':
-            raise TypeError(magic)
-        uncompressed_size = fb.read(4)
-        unknown = fb.read(4)
-        data = fb.read(-1)
+    magic: bytes = b"PK01"
+    uncompressed_size: int
+    unknown: int = 0
+    data: bytes
 
-        return magic, uncompressed_size, unknown, data
+    @staticmethod
+    def parse(data: bytes):
+        f = BytesIO(data)
 
-    def decompress(self, outputfile: str):
-        if sys.platform[:3] == "win":
-            # Windows workaround
+        assert f.read(4) == DCL.magic
 
-            tmpname = "DCLTMP"
-            tmpfile = tempfile.gettempdir() + os.sep + tmpname
+        return DCL(
+            readInt(f),
+            readInt(f),
+            f.read(-1)
+        )
 
-            # print(os.getcwd())
+    def __init__(self, uncompressedSize: int, unknown: int, data: bytes):
+        self.uncompressed_size = uncompressedSize
+        self.unknown = unknown
+        self.data = data
 
-            # write temp file
-            with open(tmpfile, "wb") as tf:
-                tf.write(self.data)
-            
-            command = sys._MEIPASS + "\\blast_args.exe " + "\"" + tmpfile + "\" \"" + outputfile + "\""
-            #print(command)
-            response = subprocess.run(command, stdout=subprocess.PIPE)
-            #print(response)
+        # init decompress lib
+        if sys.platform.startswith("win"):
+            dll = "libblast"
         else:
-            # Linux code path
-            from . import cdcl
-            
-            b_outputfile = outputfile.encode()
-            return cdcl.decompress(len(self.data), self.data, b_outputfile)
+            dll = "libblast.so"         
+        self.libblast = ctypes.CDLL(
+            os.path.join(os.path.dirname(__file__), dll))
 
+        self.libblast.decompressBytes.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
+        self.libblast.decompressBytes.restype = ctypes.c_int        
 
-    ## this shit does not work on Windows!! AHHH why is Windows such a piece of shit?
-#    def decompress_ct(self, outputfile: str):
-#        current_loc = os.path.dirname(os.path.abspath(__file__))
-#
-#        if sys.platform[:3] != "win":
-#            libblast = ctypes.CDLL(os.path.join(current_loc, "libblast.so"))
-#        else:
-#            libblast = ctypes.CDLL(os.path.join(current_loc, "libblast.dll"))
-#
-#        libblast.decompress_bytes.argtypes = [ ctypes.c_ulong, ctypes.c_char_p, ctypes.c_char_p ]    
-#        libblast.decompress_bytes.restype = ctypes.c_int
-#
-#        b_outputfile = outputfile.encode()
-#
-#        return libblast.decompress_bytes(ctypes.c_ulong(len(self.data)), self.data, b_outputfile)
+    def decompress(self) -> bytes:
+        output = bytes(self.uncompressed_size)
+
+        ret = self.libblast.decompressBytes(
+            self.data, len(self.data),
+            output, len(output)
+        )
+
+        if ret != 0:
+            raise DecompressException(f"decompressor returned error code {ret}")
+
+        return output
+
+    def __str__(self) -> str:
+        return f"magic: {self.magic}, uncompressed size: {self.uncompressed_size}, data length: {len(self.data)}"

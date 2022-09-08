@@ -1,132 +1,240 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on 22.01.2020 20:08 CET
+Created on 28.08.2022 00:19 CET
 
 @author: zocker_160
 """
 
 import os
-import sys
-import tempfile
-from io import BytesIO
+from io import BufferedReader
 
-from .DCL import DCL
+from lib.DCL import DCL
+from lib.Util import readInt
+
+
+class ParseException(Exception):
+    pass
+
+class ExtractException(Exception):
+    pass
+
+class DecompressException(Exception):
+    pass
+
+class Header:
+    magic: bytes = b'rass'
+    version_major: int = 1
+    version_minor: int = 0
+    data_start_offset: int
+
+    length: int = 16
+
+    @staticmethod
+    def parse(f: BufferedReader):
+        assert f.read(4) == Header.magic
+        assert readInt(f) == Header.version_major
+        assert readInt(f) == Header.version_minor
+
+        dso = readInt(f)
+
+        return Header(dso)
+
+    def __init__(self, data_start_offset: int):
+        self.data_start_offset = data_start_offset
+
+    def __str__(self) -> str:
+        return f"magic: {self.magic}, " \
+            + f"version: {self.version_major}.{self.version_minor}, " \
+            + f"dso: {self.data_start_offset}"
+
+class FileEntry:
+    path_length: int
+    path: bytes
+    start_offset: int
+    end_offset: int
+    size: int
+
+    @staticmethod
+    def parse(f: BufferedReader):
+        pathLength = readInt(f)
+
+        return FileEntry(
+            f.read(pathLength),
+            readInt(f),
+            readInt(f),
+            readInt(f)
+        )
+
+    def __init__(self, path: bytes, start: int, end: int, size: int):
+        self.path_length = len(path)
+        self.path = path
+        self.start_offset = start
+        self.end_offset = end
+        self.size = size
+
+    def getPath(self, encoding: str) -> str:
+        return self.path.strip(b"\0") \
+            .decode(encoding) \
+            .replace("\\", os.sep)
+
+    def __str__(self) -> str:
+        return f"path: {self.path}, start: {self.start_offset}, end: {self.end_offset}, size: {self.size}"
+
+class Attribute:
+    key_length: int
+    key: bytes
+    value_length: int
+    value: bytes
+
+    @staticmethod
+    def parse(f: BufferedReader):
+        keyLength = readInt(f)
+        key = f.read(keyLength)
+
+        valueLength = readInt(f)
+        value = f.read(valueLength)
+
+        return Attribute(key, value)
+
+    def __init__(self, key: bytes, value: bytes):
+        self.key_length = len(key)
+        self.value_length = len(value)
+
+        self.key, self.value = key, value
+
+    def __str__(self) -> str:
+        return f"key: {self.key}, value: {self.value}"
+
+class Intermediate:
+    num_attributes: int
+    attributes: list[Attribute]
+
+    @staticmethod
+    def parse(f: BufferedReader):
+        numAttr = readInt(f)
+        attributes: list[Attribute] = list()
+
+        for _ in range(numAttr):
+            attr = Attribute.parse(f)
+            attributes.append(attr)
+
+        return Intermediate(attributes)
+
+    def __init__(self, attributes: list[Attribute]):
+        self.num_attributes = len(attributes)
+        self.attributes = attributes
+
+    def __str__(self) -> str:
+        return "\n".join([str(x) for x in self.attributes])
+
+class FileData:
+    length: int
+    data: bytes
+
+    @staticmethod
+    def parse(f: BufferedReader, start: int, len: int):
+        f.seek(start, 0)
+        data = f.read(len)
+
+        return FileData(data)
+
+    def __init__(self, data: bytes):
+        self.length = len(data)
+        self.data = data
+
+    def isCompressed(self):
+        return self.data.startswith(b"PK01")
+
+    def getDecompressedData(self):
+        if self.isCompressed():
+            return DCL.parse(self.data).decompress()
+        else:
+            return self.data
+
+    def __str__(self) -> str:
+        return f"data length: {self.length}"
+
 
 class SSA:
-    def __init__(self, version_major=0, version_minor=0, data_offset=0, data_body=b''):
-        self.header = {
-            "magic": b'rass',
-            "version_major": version_major,
-            "version_minor": version_minor,
-            "data_offset": data_offset
-        }
-        self.SSAbody = data_body
-        self.header_length = 16
 
-    def read_from_file(self, filename: str):
-        with open(filename, 'rb') as ssafile:
-            read_int_buff = lambda x: int.from_bytes(ssafile.read(x), byteorder="little", signed=False)
+    header: Header
+    file_index: list[FileEntry]
+    intermediate: Intermediate
+    file_data: list[FileData]
 
-            print("parsing........")
+    archiveName: str
+    encoding: str = "ISO-8859-15"
 
-            magic = ssafile.read(4)
-            if self.header["magic"] != magic:
-                raise ImportError("ERROR: this is not a (supported) SSA file", magic.decode())
+    @staticmethod
+    def parseFile(filename: str):
+        with open(filename, "rb") as ssafile:
+            header = Header.parse(ssafile)
+            entries: list[FileEntry] = list()
 
-            self.header["version_major"] = read_int_buff(4)
-            self.header["version_minor"] = read_int_buff(4)
-            self.header["data_offset"] = read_int_buff(4)
+            while ssafile.tell() < (header.data_start_offset + header.length):
+                fe = FileEntry.parse(ssafile)
+                entries.append(fe)
 
-            if (self.header["version_major"] != 1 or self.header["version_minor"] != 0):
-                raise TypeError("ERROR: this version of SSA is not supported", self.header["version_major"], self.header["version_minor"])
+            intermediate = Intermediate.parse(ssafile)
 
-            self.SSAbody = ssafile.read(-1)
+            files: list[FileData] = list()
 
-    def get_files_list(self, char_encoding="ISO-8859-15"):
-        body_bin = BytesIO(self.SSAbody)
-        file_bin = BytesIO(body_bin.read(self.header["data_offset"]))
-        del body_bin
+            for entry in entries:
+                file = FileData.parse(
+                    ssafile, entry.start_offset, entry.size)
+                files.append(file)
 
-        read_int_buff = lambda x: int.from_bytes(file_bin.read(x), byteorder="little", signed=False)
+            archive = os.path.basename(filename)
 
-        files = list()
+            return SSA(header, entries, intermediate, files, archive)
+
+    def __init__(self, 
+            header: Header, 
+            fileIndex: list[FileEntry], 
+            intermediate: Intermediate, 
+            fileData: list[FileData],
+            archiveName: str = ""):
         
-        while True:
-            length = file_bin.read(4)
-            #print(length)
-            if length == b'':
-                break
-            length = int.from_bytes(length, byteorder="little", signed=False)
-            #print(length)
-            filename = file_bin.read(length-1) # the string itself is only length - 1 long
-            file_bin.read(1) # delimiter 0x00
-            files.append( [ filename.decode(char_encoding), read_int_buff(4), read_int_buff(4), read_int_buff(4) ] )
-
-        return files
-
-    def print_files_list(self):
-        files = self.get_files_list()
-
-        output = "SSA files list: \n"
-
-        for file in files:
-            output += "%s; start offset: %d; end offset: %d; size: %dKiB" % (file[0], file[1], file[2], file[3]/1024)
-            output += "\n"
-
-        print(output)
-        return files
-
-    def extract(self, files_list: list, ssa_binary: bytes, outputfolder: str, decompress=False, silent=False):
-        # check for OS
-        if sys.platform[:3] == "win":
-            windows = True
-        else:
-            windows = False
+        self.header = header
+        self.file_index = fileIndex
+        self.intermediate = intermediate
+        self.file_data = fileData
+        self.archiveName = archiveName
+    
+    def extract(self, outputFolder: str, decompress=False):
+        outputFolder = os.path.join(outputFolder, self.archiveName)
         
         if decompress:
-            outputfolder += "extracted_decompressed"
-            print("extracting & decompressing........")
+            outputFolder += ".decompressed"
         else:
-            outputfolder += "extracted"
-            print("extracting........")
-        ssa = BytesIO(ssa_binary)
+            outputFolder += ".extracted"
 
+        for i, (file, data) in enumerate(zip(self.file_index, self.file_data)):
+            path = os.path.join(
+                outputFolder, file.getPath(self.encoding))
+            os.makedirs(os.path.dirname(path), exist_ok=True)
 
-        if not os.path.exists(outputfolder):
-            os.makedirs(outputfolder)
-        os.chdir(outputfolder)
+            with open(path, "wb") as f:
+                if decompress:
+                    f.write(data.getDecompressedData())
+                else:
+                    f.write(data.data)
 
-        for asset in files_list:
-            path = str(asset[0])
-            folder = path.split("\\")[0]
-            if not os.path.exists(folder):
-                os.makedirs(folder)
+            print(
+                f"({i+1}/{len(self.file_index)})",
+                "compressed" if data.isCompressed() else "raw")
 
-            # since FUCKING WINDOWS shit has "\" instead of "/" like every other normal OS, I need to check for it
-            if not windows:
-                path = path.replace("\\", "/")
-            if not silent:
-                print(path) # print path so user gets feedback that something happens
+    def printFileIndex(self):
+        print("\n".join([str(x) for x in self.file_index]))
 
-            ## decompressor
-            if decompress:
-                path = os.path.join(os.getcwd(), path)
+    def __str__(self) -> str:
+        return f"""SSA [
+            header: {self.header}
+            entries: {len(self.file_index)}
+            intermediate: \n{self.intermediate}
+            files: {len(self.file_data)}
+            encoding: {self.encoding}
+        ]
+        """
 
-                data_blob = b''
-                ssa.seek(asset[1] - self.header_length) # we need to subtract header length because the SSAbody doesn't contain the header anymore (after read_from_file())
-                data_blob = ssa.read(asset[3])
-
-                try:
-                    DCL_tmp = DCL(empty=False, data=data_blob)
-                    DCL_tmp.decompress(outputfile=path)
-                    del DCL_tmp
-                except TypeError as err:
-                    # print("This file is not compressed; magic: %s\n%s" % (err.args[0], path.split(os_delimiter)[-1]))
-                    with open(path, 'wb') as newfile: # some files are not compressed, so they do not have the PK01 header
-                        newfile.write(data_blob)
-
-            else:
-                with open(path, 'wb') as newfile:
-                    ssa.seek(asset[1] - self.header_length) # we need to subtract header length because the SSAbody doesn't contain the header anymore (after read_from_file())
-                    newfile.write(ssa.read(asset[3]))

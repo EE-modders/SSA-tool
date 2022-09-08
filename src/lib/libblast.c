@@ -438,110 +438,83 @@ int blast(blast_in infun, void *inhow, blast_out outfun, void *outhow,
 
 unsigned long CHUNKSIZE;
 
-local unsigned inf(void *how, unsigned char **buf)
-{
-    static unsigned char hold[CHUNK];
-
-    *buf = hold;
-    return fread(hold, 1, CHUNK, (FILE *)how);
-}
-
-local int outf(void *how, unsigned char *buf, unsigned len)
-{
-    return fwrite(buf, 1, len, (FILE *)how) != len;
-}
-
-
-local unsigned inarrayf(char *how, unsigned char **buf)
-{
-	static unsigned char hold[CHUNK];
-	unsigned long size_input = sizeof(how);
-	
-    printf("FILE SIZE: %li\n", size_input);
-
-	*buf = hold;
-	
-	if (CHUNK >= size_input){
-        printf("SMALLER\n");
-		memcpy(hold, how, size_input * sizeof(char));
-		
-		return size_input;
-	}else{
-        printf("BIGGER\n");
-		memcpy(hold, how, size_input * sizeof(char));
-		
-		int newsize = size_input - CHUNK;
-		char tmp[newsize];
-		
-		memcpy(tmp, how+CHUNK, newsize);
-		how = tmp;
-		
-		// zum Testen, Pointer einfach nach hinten schieben
-		//how = &how+CHUNK;
-		
-		return CHUNK;
-	}
-}
-
-
-local unsigned inarray2f(char *how, unsigned char **buf)
-{
-	unsigned char hold[CHUNKSIZE];
-    *buf = how;
-    
-    return CHUNKSIZE;
-}
-
 /* Decompress a PKWare Compression Library stream
 *  #####
 *  decompress_bytes( length_of_inputbytes, char_array_of_inputbytes, char_array_of_string_for_filename )
 */
 
-int decompress_bytes(unsigned long length, char *inputbytes, char *outputfilename)
+struct raw_buffer {
+    int length;
+    unsigned char* data;
+};
+
+unsigned int infunc(void* how, unsigned char** buf)
 {
-    int ret;
-    unsigned left;
+    struct raw_buffer* iBuffer = (struct raw_buffer*)how;
+    int tSize;
 
-    CHUNKSIZE = length;
+    if (iBuffer->length > CHUNKSIZE)
+        tSize = CHUNKSIZE;
+    else
+        tSize = iBuffer->length;
 
-    // printf("Starting C code......\n");
-    // printf("compressed data size: %li\n", CHUNKSIZE);
+    static unsigned char temp[CHUNK];
+    *buf = temp;
+    
+    memcpy(temp, iBuffer->data, tSize);
 
-    FILE *outputfile = fopen(outputfilename, "wb");
+    iBuffer->data = &iBuffer->data[tSize];
+    iBuffer->length -= tSize;
 
-    // printf("TEMP FILENAME: %s\n", inputname);
-    // printf("OUTPUT FILENAME: %s\n", outputfilename);
-
-    /* decompress to outputfile */
-    left = 0;
-    // freopen("output.txt", "w", stdout);
-	ret = blast(inarray2f, inputbytes, outf, outputfile, &left, NULL);    
-    if (ret != 0)
-        fprintf(stderr, "decompress error in libblast: %d\n", ret);
-
-    //fclose(inputfile);
-    fclose(outputfile);
-
-    /* count any leftover bytes - commendted out because it somehow doesn't terminate :(
-    * while (getchar() != EOF)
-    *     left++;
-    * if (left)
-    *     fprintf(stderr, "blast warning: %u unused bytes of input\n", left);
-    * return blast() error code
-    */
-    return ret;
+    return tSize;
 }
 
-/* main function for testing and debugging only
+int outfunc(void* how, unsigned char* buf, unsigned len)
+{
+    struct raw_buffer* oBuffer = (struct raw_buffer*)how;
+    
+    memcpy(&oBuffer->data[oBuffer->length], buf, len);
+    oBuffer->length += len;
+    
+    return 0;
+}
+
+int decompressBytes(char* input, int inLength, char* output, int outLength)
+{
+    if (inLength < CHUNK)
+        CHUNKSIZE = inLength;
+    else
+        CHUNKSIZE = CHUNK;
+
+    struct raw_buffer inBuffer;
+    inBuffer.data = input;
+    inBuffer.length = inLength;
+
+    struct raw_buffer outBuffer;
+    outBuffer.data = output;
+    outBuffer.length = 0;
+
+    int ret = blast(infunc, &inBuffer, outfunc, &outBuffer, NULL, NULL);
+    if (ret != 0)
+        printf("ERROR CODE: %i \n\n", ret);
+
+    return ret;    
+}
+
+// main function for testing and debugging only
 
 void main()
 {
-    char filename[] = "testfile";
+	char inputArray[] = { 0x00, 0x04, 0x82, 0x24, 0x25, 0x8F, 0x80, 0x7F };
+    char outputArray[100];
 
-	char byteArray[] = { 0x00, 0x04, 0x82, 0x24, 0x25, 0x8F, 0x80, 0x7F };
+    int value = decompressBytes(inputArray, sizeof(inputArray), outputArray, sizeof(outputArray));
+    printf("return value: %i \n", value);
 
-	printf("REAL file size: %li\n", CHUNKSIZE);
-	
-    int value = decompress_bytes(sizeof(byteArray), byteArray, filename);
+    FILE* f;
+    f = fopen("test", "wb");
+
+    fwrite(outputArray, 1, sizeof(outputArray), f);
+
+    fclose(f);
 }
-*/

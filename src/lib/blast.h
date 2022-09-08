@@ -37,7 +37,7 @@
  */
 
 
-typedef unsigned (*blast_in)(char *how, unsigned char **buf);
+typedef unsigned (*blast_in)(void *how, unsigned char **buf);
 typedef int (*blast_out)(void *how, unsigned char *buf, unsigned len);
 /* Definitions for input/output functions passed to blast().  See below for
  * what the provided functions need to do.

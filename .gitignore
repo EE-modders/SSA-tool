@@ -5,6 +5,11 @@ bin/
 *.desktop
 *.so
 *.dll
+*.bak
+
+!__init*
+!libblast.dll
+!libblast.so
 
 src/test.py
 src/lib/build
